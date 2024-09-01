@@ -1,1 +1,2 @@
 Django==3.2 #Django
+faker==28.1.0

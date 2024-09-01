@@ -12,6 +12,7 @@ class Produto(models.Model):
         GrupoProduto, on_delete=models.CASCADE, related_name='cadastros_produto_set')
     fornecedor = models.ForeignKey(
         Fornecedor, on_delete=models.CASCADE, related_name='cadastros_produto_set')
+    sku = models.CharField(max_length=16)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 

@@ -8,6 +8,7 @@ class EquipeVenda(models.Model):
     loja = models.ForeignKey(
         Loja, on_delete=models.CASCADE, related_name='cadastros_equipe_venda_set')
     nome = models.CharField(max_length=25)
+    percent_comissao = models.DecimalField(max_digits=5, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 
