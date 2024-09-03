@@ -1,7 +1,30 @@
 from django.db import models
+from django.db.models import F, Value
+from django.db.models.functions import Concat
 
 from .fornecedor import Fornecedor
 from .grupo_produto import GrupoProduto
+
+
+class ProdutoQuerySet(models.QuerySet):
+    """Classe que customiza o QuerySet da model principal"""
+
+    def annotate_with_grupo_produto_and_fornecedor_related(self) -> models.QuerySet:
+        """Retorna um queryset com dados relacionados ao Produto"""
+        return (
+            self
+            .select_related('grupo_produto')
+            .annotate(
+                grupo_produto__label=Concat(
+                    F('grupo_produto__codigo'),
+                    Value(' | '),
+                    F('grupo_produto__nome')),
+                fornecedor__label=Concat(
+                    F('fornecedor__cnpj'),
+                    Value(' | '),
+                    F('fornecedor__nome'))
+            )
+        )
 
 
 class Produto(models.Model):
@@ -15,6 +38,8 @@ class Produto(models.Model):
     sku = models.CharField(max_length=16)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
+
+    objcts = ProdutoQuerySet.as_manager()
 
     class Meta:
         db_table = 'cadastro_produto'
