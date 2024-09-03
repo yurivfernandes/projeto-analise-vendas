@@ -15,7 +15,7 @@ class Imposto(models.Model):
     updated_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'receita_venda'
+        db_table = 'receita_imposto'
         verbose_name = 'Receita Imposto'
         verbose_name_plural = 'Receita Impostos'
         unique_together = ('loja', 'tipo')
