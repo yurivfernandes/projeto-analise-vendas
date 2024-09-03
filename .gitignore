@@ -8,7 +8,3 @@
 .run/
 .env
 **/db.sqlite3
-db.sqlite3/
-db.sqlite3
-src/db.sqlite3
-.sqlite3
