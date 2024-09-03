@@ -6,7 +6,7 @@ from .grupo_produto import GrupoProduto
 
 class Produto(models.Model):
     nome = models.CharField(max_length=100)
-    codigo = models.CharField(max_length=10)
+    codigo = models.CharField(max_length=10, unique=True)
     custo = models.DecimalField(max_digits=14, decimal_places=2)
     grupo_produto = models.ForeignKey(
         GrupoProduto, on_delete=models.CASCADE, related_name='cadastros_produto_set')
