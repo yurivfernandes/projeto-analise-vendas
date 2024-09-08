@@ -8,6 +8,12 @@ from cadastros.models import Produto, Vendedor
 class VendaQuerySet(models.QuerySet):
     """Classe que customiza o QuerySet da model principal"""
 
+    def annotate_with_receita_bruta(self) -> models.QuerySet:
+        return (
+            self.annotate(valor_receita_bruta=models.Sum(
+                'valor') * models.Sum('quantidade'))
+        )
+
     def annotate_with_vendedor_related(self) -> models.QuerySet:
         """Retorna um queryset com dados relacionados ao Vendedor"""
         return (

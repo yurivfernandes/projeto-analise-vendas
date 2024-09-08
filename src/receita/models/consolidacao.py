@@ -4,6 +4,7 @@ from django.db.models.functions import Concat
 
 from cadastros.models import Produto, Vendedor
 
+from .imposto_tipo import ImpostoTipo
 from .tipo import Tipo
 
 
@@ -62,7 +63,6 @@ class Consolidacao(models.Model):
         Vendedor, on_delete=models.CASCADE, related_name='receita_consolidacao_set')
     produto = models.ForeignKey(
         Produto, on_delete=models.CASCADE, related_name='receita_consolidacao_set')
-    quantidade = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = ConsolidacaoQuerySet.as_manager()

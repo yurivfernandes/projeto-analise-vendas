@@ -7,7 +7,7 @@ class Command(BaseCommand):
     help = 'Preenche a tabela ImpostoTipo com os tipos de imposto iniciais'
 
     def handle(self, *args, **kwargs):
-        tipos_imposto = ['ICMS', 'ISS', 'IPI', 'PIS', 'Cofins']
+        tipos_imposto = ['ICMS', 'ISS']
         for tipo in tipos_imposto:
             if not ImpostoTipo.objects.filter(nome=tipo).exists():
                 ImpostoTipo.objects.create(nome=tipo)

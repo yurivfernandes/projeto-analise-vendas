@@ -5,8 +5,9 @@ from django.db import models
 class Loja(models.Model):
     telefone_regex = RegexValidator(
         regex=r'^\+?1?\d{9,15}$',
-        message="O número de telefone deve estar no formato '+999999999'. Até 15 dígitos permitidos."
-    )
+        message=(
+            "O número de telefone deve estar no formato '+999999999'."
+            "Até 15 dígitos permitidos."))
     nome = models.CharField(max_length=255, unique=True)
     codigo = models.CharField(max_length=15, unique=True)
     bairro = models.CharField(max_length=255)
