@@ -1,4 +1,3 @@
-# receita/management/commands/create_impostos.py
 from django.core.management.base import BaseCommand
 
 from cadastros.models.loja import Loja
