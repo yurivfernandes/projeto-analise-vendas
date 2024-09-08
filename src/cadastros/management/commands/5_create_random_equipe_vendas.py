@@ -1,5 +1,3 @@
-# cadastros/management/commands/inserir_equipes.py
-
 from django.core.management.base import BaseCommand
 from django.db import transaction
 

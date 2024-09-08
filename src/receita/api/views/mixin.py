@@ -4,8 +4,6 @@ from datetime import datetime
 import polars as pl
 from django.db import models
 from django.db.models import QuerySet
-from django.shortcuts import get_object_or_404
-from django.utils.functional import cached_property
 from pandas import date_range
 from rest_framework.request import Request
 from rest_framework.response import Response

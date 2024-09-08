@@ -4,7 +4,6 @@ from django.db.models.functions import Concat
 
 from cadastros.models import Produto, Vendedor
 
-from .imposto_tipo import ImpostoTipo
 from .tipo import Tipo
 
 

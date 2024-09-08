@@ -6,7 +6,6 @@ from django.db.models import QuerySet
 from app.utils.pipiline import Pipeline
 
 from ..models import Consolidacao
-from ..utils import Mixin
 
 
 class LoadConsolidacao(Pipeline, Mixin):
