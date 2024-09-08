@@ -4,3 +4,6 @@ numpy==1.23.4
 pandas==1.5.3
 celery==5.2.7
 polars==1.6.0
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.2.2
+django-filter==22.1

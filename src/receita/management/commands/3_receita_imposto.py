@@ -75,15 +75,11 @@ class Command(BaseCommand):
         impostos_tipos = {
             'ICMS': {},
             'ISS': {},
-            'IPI': {'default_percent': 5.00},
-            'PIS': {'default_percent': 1.65},
-            'Cofins': {'default_percent': 7.60},
         }
 
         for nome, dados in impostos_tipos.items():
             tipo, created = ImpostoTipo.objects.get_or_create(nome=nome)
             for loja in lojas:
-                # Valor default, se aplicável
                 percent = dados.get('default_percent', 0)
 
                 if nome == 'ICMS':

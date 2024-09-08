@@ -9,7 +9,8 @@ class Pipeline:
             'n_inserted': 0,
             'n_deleted': 0,
             'started_at': timezone.now(),
-            'finished_at': None
+            'finished_at': None,
+            'duration': None
         }
 
     def __enter__(self):
@@ -17,3 +18,6 @@ class Pipeline:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.log['finished_at'] = timezone.now()
+        self.log['duration'] = (
+            self.log['finished_at'] -
+            self.log['started_at']).total_seconds()
