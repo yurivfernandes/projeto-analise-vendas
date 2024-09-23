@@ -39,7 +39,7 @@ class Produto(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 
-    objcts = ProdutoQuerySet.as_manager()
+    objects = ProdutoQuerySet.as_manager()
 
     class Meta:
         db_table = 'cadastro_produto'
