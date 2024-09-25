@@ -7,7 +7,7 @@ from receita.models.imposto_tipo import ImpostoTipo
 
 class Command(BaseCommand):
     help = 'Cria registros de impostos com valores predefinidos'
-
+    
     ICMS_POR_ESTADO = {
         'AC': 17.00,
         'AL': 18.00,
