@@ -8,3 +8,4 @@
 .run/
 .env
 **/db.sqlite3
+.pytlintrc

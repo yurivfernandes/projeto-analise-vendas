@@ -1,4 +1,3 @@
-
 from datetime import datetime
 
 import polars as pl
@@ -12,58 +11,73 @@ from ...models import Consolidacao
 
 
 class Mixin:
-
     def get(self, request: Request, *args, **kwargs) -> Response:
-        self.data_range = (
-            request.GET.get('data_inicio'),
-            request.GET.get('data_fim'))
+        self.data_range = self._valid_date(
+            data_inicio=request.GET.get("data_inicio"),
+            data_fim=request.GET.get("data_fim"),
+        )
         self._set_date_maps()
         return Response(self.main())
+
+    def _valid_date(self, data_inicio: str, data_fim: str):
+        """Valida se as datas passadas no request são válidas"""
+        if not data_inicio or not data_fim:
+            raise ValueError(
+                "Ambas as datas, início e fim, devem ser fornecidas."
+            )
+        try:
+            data_inicio_formatada = datetime.strptime(
+                data_inicio, "%Y-%m-%d"
+            )
+            data_fim_formatada = datetime.strptime(data_fim, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError(
+                "As datas devem estar no formato 'aaaa-mm-dd'."
+            )
+        if data_inicio_formatada > data_fim_formatada:
+            raise ValueError(
+                "A data de início não pode ser posterior à data de fim."
+            )
+        return (data_inicio_formatada, data_fim_formatada)
 
     def get_consolidacao_queryset(self) -> QuerySet:
         return Consolidacao.objects.filter(data__range=self.data_range)
 
     def _set_date_maps(self) -> None:
         """Define o mapeamento entre datas em formato datetime.date e a string para consumo do front"""
-        dt_list = [datetime.strptime(dt, '%Y-%m-%d') for dt in self.data_range]
-
         self.date_map = {
             d.date().isoformat(): f"{d.strftime('%Y')}-{d.strftime('%m')}"
-            for d in
-            date_range(
-                start=min(dt_list).replace(day=1),
-                end=max(dt_list).replace(day=1),
-                freq="MS")
+            for d in date_range(
+                start=min(self.data_range).replace(day=1),
+                end=max(self.data_range).replace(day=1),
+                freq="MS",
+            )
         }
-        self.date_columns = [f'{dt}' for dt in self.date_map.values()]
+        self.date_columns = [f"{dt}" for dt in self.date_map.values()]
 
     def main(self) -> list:
         """Implementar o método main retornando um DataFrame"""
         raise NotImplementedError("Subclass must implement this method")
 
-    def _get_dataset(self, query_set: models.QuerySet, schema: dict) -> pl.DataFrame:
+    def _get_dataset(
+        self, query_set: models.QuerySet, schema: dict
+    ) -> pl.DataFrame:
         """Retorna os dados do queryset em formato de dataframe"""
-        return (
-            pl.DataFrame(
-                data=list(query_set),
-                schema=dict(
-                    **{k: v.get('type') for k, v in schema.items()}
-                )
-            )
-            .rename({k: v['rename'] for k, v in schema.items()}))
+        return pl.DataFrame(
+            data=list(query_set),
+            schema=dict(
+                **{k: v.get("type") for k, v in schema.items()}
+            ),
+        ).rename({k: v["rename"] for k, v in schema.items()})
 
     def _extract_and_transform_dataset(self, df: pl.DataFrame) -> None:
         """Implementar o método que carrega e transforma o dataset principal para o main"""
         self.dataset = (
-            df
-            .with_columns(
-                pl.col('data')
-                .dt
-                .truncate("1mo")
-                .alias('data')
+            df.with_columns(
+                pl.col("data").dt.truncate("1mo").alias("data")
             )
             .pipe(self._replace_with_date_map)
-            .sort(['data'])
+            .sort(["data"])
             .pipe(self._pivot_dataset)
             .pipe(self._ensure_date_cols)
             .fill_null(0)
@@ -76,21 +90,21 @@ class Mixin:
         )
 
     def _replace_with_date_map(self, df: pl.DataFrame) -> pl.DataFrame:
-        return df.with_columns(data=pl.col('data').replace(self.date_map, default=None)).drop_nulls(subset='data')
+        return df.with_columns(
+            data=pl.col("data").replace(self.date_map, default=None)
+        ).drop_nulls(subset="data")
 
     def _pivot_dataset(self, df: pl.DataFrame) -> pl.DataFrame:
         """Efetua o pivot dos dados transformando as colunas de valor em data e valor."""
         idx_columns = [
-            c for c in df.columns
-            if c not in ['valor', 'data']]
-        return (
-            df
-            .with_row_count("index")
-            .pivot(
-                values=['valor'],
-                index=idx_columns,
-                columns='data',
-                aggregate_function='first'))
+            c for c in df.columns if c not in ["valor", "data"]
+        ]
+        return df.with_row_count("index").pivot(
+            values=["valor"],
+            index=idx_columns,
+            columns="data",
+            aggregate_function="first",
+        )
 
     def _ensure_date_cols(self, df: pl.DataFrame) -> pl.DataFrame:
         cols = [c for c in self.date_columns if c not in df.columns]

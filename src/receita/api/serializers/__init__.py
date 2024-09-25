@@ -1,0 +1,1 @@
+from .consolidacao import ConsolidacaoSerializer
