@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.timezone import make_aware
 
-from cadastros.models import Produto, Vendedor
+from cadastros.models import Produto, Vendedor, Cliente  # Adicionando Cliente
 from receita.models import Venda
 
 
@@ -66,6 +66,7 @@ class Command(BaseCommand):
         products_weights = [
             product_group_weights[product.grupo_produto.nome] for product in products]
         vendors = list(Vendedor.objects.all())
+        clients = list(Cliente.objects.all())  # Lista de clientes
 
         with transaction.atomic():
             current_date = start_date
@@ -82,6 +83,7 @@ class Command(BaseCommand):
                             selected_products = random.choices(
                                 products_list, weights=products_weights, k=num_products)
                             vendor = random.choice(vendors)
+                            client = random.choice(clients)  # Seleciona um cliente aleatório
                             venda_nfe = str(nfe_counter).zfill(10)
 
                             for product in selected_products:
@@ -96,6 +98,7 @@ class Command(BaseCommand):
                                     valor=preco_venda,
                                     produto=product,
                                     vendedor=vendor,
+                                    cliente=client,  # Associando o cliente à venda
                                     quantidade=quantidade)
 
                                 total_daily_sales += venda_total
