@@ -12,6 +12,11 @@ router.register(
     basename="produto",
 )
 router.register(
+    "produto-post",
+    viewset=viewsets.ProdutoPostViewset,
+    basename="produto",
+)
+router.register(
     "vendedor",
     viewset=viewsets.VendedorViewset,
     basename="vendedor",
