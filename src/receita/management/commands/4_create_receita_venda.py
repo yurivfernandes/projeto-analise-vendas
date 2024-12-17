@@ -5,19 +5,21 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.timezone import make_aware
 
-from cadastros.models import Produto, Vendedor, Cliente  # Adicionando Cliente
+from cadastros.models import Cliente, Produto, Vendedor  # Adicionando Cliente
 from receita.models import Venda
 
 
 class Command(BaseCommand):
-    help = 'Populate the Venda model with realistic data.'
+    help = "Populate the Venda model with realistic data."
 
     def handle(self, *args, **kwargs):
-        self.stdout.write(self.style.SUCCESS('Inicializando o processo'))
+        self.stdout.write(self.style.SUCCESS("Inicializando o processo"))
+
         start_date = datetime(2010, 1, 1)
         end_date = datetime.now()
         holidays = [(12, 25), (1, 1)]
         nfe_counter = 1
+
         stores = {
             "São Paulo": 380000,
             "Rio de Janeiro": 300000,
@@ -45,28 +47,49 @@ class Command(BaseCommand):
             "Macapá": 180000,
             "Palmas": 180000,
             "Boa Vista": 180000,
-            "Rio Branco": 180000
+            "Rio Branco": 180000,
         }
-        products = Produto.objects.all()
+
         product_weights = {
-            'Bicicletas para Adultos': 0.30,
-            'Bicicletas para Crianças': 0.25,
-            'Ferramentas e Manutenção': 0.20,
-            'Capacetes': 0.05,
-            'Luzes e Refletores': 0.05,
-            'Pneus e Câmaras de Ar': 0.05,
-            'Selins e Rodas': 0.03,
-            'Roupas e Acessórios': 0.03,
-            'Suportes e Grades': 0.02,
-            'Cadeados e Correntes': 0.02
+            "Bicicletas para Adultos": 0.30,
+            "Bicicletas para Crianças": 0.25,
+            "Ferramentas e Manutenção": 0.20,
+            "Capacetes": 0.05,
+            "Luzes e Refletores": 0.05,
+            "Pneus e Câmaras de Ar": 0.05,
+            "Selins e Rodas": 0.03,
+            "Roupas e Acessórios": 0.03,
+            "Suportes e Grades": 0.02,
+            "Cadeados e Correntes": 0.02,
         }
+
+        products = Produto.objects.all()
+        if not products.exists():
+            raise ValueError("Nenhum produto encontrado no banco de dados.")
+
+        vendors = list(Vendedor.objects.all())
+        if not vendors:
+            raise ValueError("Nenhum vendedor encontrado no banco de dados.")
+
+        clients = list(Cliente.objects.all())
+        if not clients:
+            raise ValueError("Nenhum cliente encontrado no banco de dados.")
+
         product_group_weights = {
-            product.grupo_produto.nome: product_weights[product.grupo_produto.nome] for product in products}
+            product.grupo_produto.nome: product_weights.get(
+                product.grupo_produto.nome, 0.01
+            )
+            for product in products
+        }
+
         products_list = list(products)
         products_weights = [
-            product_group_weights[product.grupo_produto.nome] for product in products]
-        vendors = list(Vendedor.objects.all())
-        clients = list(Cliente.objects.all())  # Lista de clientes
+            product_group_weights.get(product.grupo_produto.nome, 0.01)
+            for product in products
+        ]
+
+        if not products_list or not products_weights:
+            raise ValueError("A lista de produtos ou os pesos estão vazios.")
 
         with transaction.atomic():
             current_date = start_date
@@ -74,21 +97,26 @@ class Command(BaseCommand):
                 if not (current_date.month, current_date.day) in holidays:
                     for store, avg_sales in stores.items():
                         if current_date.month == 12:
-                            avg_sales = avg_sales * 1.5
+                            avg_sales *= 1.5
                         daily_sales_target = avg_sales / 30
                         total_daily_sales = 0
 
                         while total_daily_sales < daily_sales_target:
                             num_products = random.randint(1, 3)
                             selected_products = random.choices(
-                                products_list, weights=products_weights, k=num_products)
+                                products_list,
+                                weights=products_weights,
+                                k=num_products,
+                            )
                             vendor = random.choice(vendors)
-                            client = random.choice(clients)  # Seleciona um cliente aleatório
+                            client = random.choice(clients)
                             venda_nfe = str(nfe_counter).zfill(10)
 
                             for product in selected_products:
-                                preco_venda = float(
-                                    product.custo) + (float(product.custo) * float(random.uniform(0.3, 0.55)))
+                                preco_venda = float(product.custo) + (
+                                    float(product.custo)
+                                    * random.uniform(0.3, 0.55)
+                                )
                                 quantidade = random.randint(1, 3)
                                 venda_total = preco_venda * quantidade
 
@@ -98,12 +126,13 @@ class Command(BaseCommand):
                                     valor=preco_venda,
                                     produto=product,
                                     vendedor=vendor,
-                                    cliente=client,  # Associando o cliente à venda
-                                    quantidade=quantidade)
+                                    cliente=client,
+                                    quantidade=quantidade,
+                                )
 
                                 total_daily_sales += venda_total
 
                             nfe_counter += 1
                 current_date += timedelta(days=1)
 
-        self.stdout.write(self.style.SUCCESS('Data population complete.'))
+        self.stdout.write(self.style.SUCCESS("Data population complete."))
